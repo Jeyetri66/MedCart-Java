@@ -1,0 +1,36 @@
+name: MedCart CI
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # lets you run it manually from the Actions tab
+
+jobs:
+  build-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Temurin JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile
+        run: javac -encoding UTF-8 MedCart.java
+
+      # Your app is interactive; we "pipe" a few inputs so it can run non-interactively
+      - name: Run demo
+        run: printf "1\n0\n4\n" | java -Dfile.encoding=UTF-8 MedCart
+
+      # (Optional) Save output as a downloadable file
+      - name: Capture output
+        run: printf "1\n0\n4\n" | java -Dfile.encoding=UTF-8 MedCart | tee medcart-output.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: medcart-output
+          path: medcart-output.txt
