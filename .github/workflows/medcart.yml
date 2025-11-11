@@ -1,5 +1,4 @@
 name: MedCart CI
-
 on:
   push:
     branches: [ main ]
@@ -18,10 +17,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Debug - show repo tree
+      - name: Debug tree
         run: |
-            echo "Java files:"; git ls-files '*.java' || true
-            echo "Repo tree:"; ls -la
+          echo "Java files:"; git ls-files '*.java' || true
+          echo "Repo tree:"; ls -la
 
       - name: Compile (UTF-8)
         shell: bash
@@ -29,9 +28,7 @@ jobs:
           set -e
           SRC=$(git ls-files 'MedCart.java' | head -n1)
           if [ -z "$SRC" ]; then echo "MedCart.java not found"; exit 1; fi
-          DIR=$(dirname "$SRC")
-          echo "Compiling in: $DIR"
-          cd "$DIR"
+          DIR=$(dirname "$SRC"); cd "$DIR"
           javac -encoding UTF-8 *.java
           ls -la
 
@@ -40,19 +37,15 @@ jobs:
         run: |
           set -e
           SRC=$(git ls-files 'MedCart.java' | head -n1)
-          DIR=$(dirname "$SRC")
-          cd "$DIR"
+          DIR=$(dirname "$SRC"); cd "$DIR"
           printf "1\n0\n4\n" | java -cp . -Dfile.encoding=UTF-8 MedCart
 
       - name: Capture output (optional)
         shell: bash
         run: |
-          set -e
           SRC=$(git ls-files 'MedCart.java' | head -n1)
-          DIR=$(dirname "$SRC")
-          cd "$DIR"
+          DIR=$(dirname "$SRC"); cd "$DIR"
           printf "1\n0\n4\n" | java -cp . -Dfile.encoding=UTF-8 MedCart | tee medcart-output.txt
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
