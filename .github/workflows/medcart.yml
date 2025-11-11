@@ -18,50 +18,41 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Show repo tree (debug)
+      - name: Debug - show repo tree
         run: |
-          echo "Repository files:"
-          ls -la
-          echo "Java files:"
-          git ls-files '*.java' || true
+            echo "Java files:"; git ls-files '*.java' || true
+            echo "Repo tree:"; ls -la
 
-      # Find the folder containing MedCart.java (root or subfolder) and compile there
       - name: Compile (UTF-8)
         shell: bash
         run: |
           set -e
-          FILE=$(git ls-files 'MedCart.java' | head -n1)
-          if [ -z "$FILE" ]; then
-            echo "ERROR: MedCart.java not found in repo." >&2
-            exit 1
-          fi
-          DIR=$(dirname "$FILE")
-          echo "MedCart.java directory: $DIR"
+          SRC=$(git ls-files 'MedCart.java' | head -n1)
+          if [ -z "$SRC" ]; then echo "MedCart.java not found"; exit 1; fi
+          DIR=$(dirname "$SRC")
+          echo "Compiling in: $DIR"
           cd "$DIR"
-          # compile all .java files in that folder
           javac -encoding UTF-8 *.java
           ls -la
 
-      # Run with piped inputs so it doesn't wait for keyboard
-      - name: Run demo
+      - name: Run demo (pipe inputs)
         shell: bash
         run: |
           set -e
-          FILE=$(git ls-files 'MedCart.java' | head -n1)
-          DIR=$(dirname "$FILE")
+          SRC=$(git ls-files 'MedCart.java' | head -n1)
+          DIR=$(dirname "$SRC")
           cd "$DIR"
-          printf "1\n0\n4\n" | java -Dfile.encoding=UTF-8 MedCart
+          printf "1\n0\n4\n" | java -cp . -Dfile.encoding=UTF-8 MedCart
 
-      # Optional: capture output as artifact
-      - name: Capture output
+      - name: Capture output (optional)
         shell: bash
         run: |
           set -e
-          FILE=$(git ls-files 'MedCart.java' | head -n1)
-          DIR=$(dirname "$FILE")
+          SRC=$(git ls-files 'MedCart.java' | head -n1)
+          DIR=$(dirname "$SRC")
           cd "$DIR"
-          printf "1\n0\n4\n" | java -Dfile.encoding=UTF-8 MedCart | tee medcart-output.txt
-          ls -la
+          printf "1\n0\n4\n" | java -cp . -Dfile.encoding=UTF-8 MedCart | tee medcart-output.txt
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
